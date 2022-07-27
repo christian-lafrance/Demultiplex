@@ -5,13 +5,23 @@
 
 | File name | label | Read length | Phred encoding |
 |---|---|---|---|
-| 1294_S1_L008_R1_001.fastq.gz |  |  |  |
-| 1294_S1_L008_R2_001.fastq.gz |  |  |  |
-| 1294_S1_L008_R3_001.fastq.gz |  |  |  |
-| 1294_S1_L008_R4_001.fastq.gz |  |  |  |
+| 1294_S1_L008_R1_001.fastq.gz | read1 | 101 | 33 |
+| 1294_S1_L008_R2_001.fastq.gz | index1 | 8 | 33 |
+| 1294_S1_L008_R3_001.fastq.gz | index2 | 8 | 33 |
+| 1294_S1_L008_R4_001.fastq.gz | read2 | 101 | 33 |
 
 2. Per-base NT distribution
     1. Use markdown to insert your 4 histograms here.
+    Index 1
+![](https://github.com/christian-lafrance/Demultiplex/tree/master/Assignment-the-first/Index_1.png)
+    Index 2
+![](https://github.com/christian-lafrance/Demultiplex/tree/master/Assignment-the-first/Index_2.png)
+    Read 1
+![](https://github.com/christian-lafrance/Demultiplex/tree/master/Assignment-the-first/Read_1.png)
+    Read 2
+![](https://github.com/christian-lafrance/Demultiplex/tree/master/Assignment-the-first/Read_2.png)
+
+
     2. **YOUR ANSWER HERE**
     3. **YOUR ANSWER HERE**
     
