@@ -13,13 +13,13 @@
 2. Per-base NT distribution
     1. Use markdown to insert your 4 histograms here.
     Index 1
-![](https://github.com/christian-lafrance/Demultiplex/tree/master/Assignment-the-first/Index_1.png)
+![](https://github.com/christian-lafrance/Demultiplex/blob/master/Assignment-the-first/Index_1.png)
     Index 2
-![](https://github.com/christian-lafrance/Demultiplex/tree/master/Assignment-the-first/Index_2.png)
+![](https://github.com/christian-lafrance/Demultiplex/blob/master/Assignment-the-first/Index_2.png)
     Read 1
-![](https://github.com/christian-lafrance/Demultiplex/tree/master/Assignment-the-first/Read_1.png)
+![](https://github.com/christian-lafrance/Demultiplex/blob/master/Assignment-the-first/Read_1.png)
     Read 2
-![](https://github.com/christian-lafrance/Demultiplex/tree/master/Assignment-the-first/Read_2.png)
+![](https://github.com/christian-lafrance/Demultiplex/blob/master/Assignment-the-first/Read_2.png)
 
 
     2. **YOUR ANSWER HERE**
