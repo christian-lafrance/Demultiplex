@@ -1,7 +1,7 @@
 # Assignment the First
 
 ## Part 1
-1. Be sure to upload your Python script.
+1. Be sure to upload your Python script (i, ii, and iii).
 
 | File name | label | Read length | Phred encoding |
 |---|---|---|---|
@@ -12,18 +12,22 @@
 
 2. Per-base NT distribution
     1. Use markdown to insert your 4 histograms here.
-    Index 1
 ![](https://github.com/christian-lafrance/Demultiplex/blob/master/Assignment-the-first/Index_1.png)
-    Index 2
 ![](https://github.com/christian-lafrance/Demultiplex/blob/master/Assignment-the-first/Index_2.png)
-    Read 1
 ![](https://github.com/christian-lafrance/Demultiplex/blob/master/Assignment-the-first/Read_1.png)
-    Read 2
 ![](https://github.com/christian-lafrance/Demultiplex/blob/master/Assignment-the-first/Read_2.png)
 
 
-    2. **YOUR ANSWER HERE**
-    3. **YOUR ANSWER HERE**
+    2. 30 seems like a good cut off. All of the average quality scores
+        are above 30. A score of 30 would indicate a 0.1% chance of an
+        incorrect base call. 
+    3. 
+        Index_1 file:
+        '''zcat 1294_S1_L008_R2_001.fastq.gz | sed -n "2~4p" | grep "N" | wc -l'''
+        Result: 3976613 reads contain an N. 
+        Index_2 file:
+        '''zcat 1294_S1_L008_R3_001.fastq.gz | sed -n "2~4p" | grep "N" | wc -l'''
+        Result: 3328051 reads contain an N. 
     
 ## Part 2
 1. Define the problem

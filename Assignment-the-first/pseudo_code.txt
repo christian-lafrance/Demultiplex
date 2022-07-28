@@ -1,0 +1,85 @@
+
+1. Define the problem:
+
+    Need to iterate over lines in each file at the same time, so that indexes
+    can be associated with their reads. Index2 will need to be reverse-
+    complimented and compared to index1. Check if indexes are in the list of 
+    expected indexes. If not, immediately add to unknown file. If they are 
+    expected, and match, then the read is good to be written to its corresponding 
+    file. If they are valid but do not match, then add to the mismatched file. 
+
+2. Pseudo code:
+
+    # generate list of valid indexes
+    open indexes.txt as i:
+        add each to indexes
+
+    Generate all expected files (52 total) using the barcodes and R1/R2. Create a dictionary
+    with a string of the file name as the key and the file itself as the value. After they are
+    all created, open them. The file names should be make in 
+    such a way that they can be referred to using the actual index from the index file. 
+    in a dictionary. 
+
+        open read1.fq as r1, open read2.fq as r2, open index1.fq as i1, open index2.fq as i1:
+            
+            Use counter to keep track of line, initialize at 1
+
+            for each line in the files
+
+                if the counter is 5 (then the record is assembled, do this:)
+                    reset counter to 1. 
+                    Filter index quality. If quality is too low or contains an N, add to unknown file. 
+                    if i1 or i2 is not an expected index add to unknown file. 
+                    else if i1 and i2 are expected indexes but are not reverse compliments of eachother
+                        add to hopped file. 
+                    else 
+                        update r1 header with indexes
+                        update r2 header with indexes
+                        write r1 and r2 to their corresponding files named with their indexes. 
+                        
+                Use a dictionary to store the current record for each file at
+                the same time:
+                key will be "r1", "r2", "i1", or "i2". The value will be a list with the line
+                from the file with the index representing the line. So the header
+                will be pos 0, seq will be pos 1, + will be pos 2, and qual score 
+                will be pos 3. 
+
+
+3. High level functions:
+
+    def generate_barcode_list(index_file: str) -> list:
+        '''
+        Takes a TSV file name as an argument. Opens the file that contains 
+        expected barcodes and generate a list of the expected barcodes. 
+        '''
+
+        return barcode_list
+
+    def generate_rev_comp(seq: str) -> str:
+        '''
+        Takes a string as an argument and returns its
+        reverse compliment. 
+        '''
+        return rev_comp
+
+    def generate_output_files(barcodes: list) -> None:
+        '''
+        Takes a list of expected barcodes as an input and generates the
+        expected files. One file per barcode and read. Includes unknown file
+        and hopped index file per read. Total of 52 files. Generates a dictionary
+        with a string of the filename as a key and the file itself as a value. 
+        Use this to refer to the file. 
+        '''
+        return 
+
+    For example, if the file is named AATTGGCC_R1.qf, use something like:
+            if barcode is valid: 
+                key = f"{barcode}-R1.fq"
+                output_file_dict[key].write(the current record)
+
+    Try using itertools to open all files. 
+
+
+Unit test valid barcodes:
+ACCCCCCC
+TCCCCCCC
