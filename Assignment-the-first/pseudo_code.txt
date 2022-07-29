@@ -70,6 +70,9 @@
 
         return barcode_list
 
+        Input test: a TSV file with barcodes. 
+        Output: A list of those barcodes. 
+
 
     def generate_rev_comp(seq: str) -> str:
         '''
@@ -77,6 +80,9 @@
         reverse compliment. 
         '''
         return rev_comp
+
+        Input test: ATGC
+        Output: GCAT
 
 
     def generate_output_files(barcodes: list) -> None:
@@ -88,3 +94,12 @@
         Use this to refer to the file. 
         '''
         return 
+        
+        Input test: ["ATGC", "GGAT"]
+        Output: ATGC_R1.fq, ATGC_R2.fq, GGAT_R1.fq, GGAT_R2.fq
+
+
+    convert_phred (will be imported from bioinfo.py)
+
+        Input test: E
+        Output: 36
