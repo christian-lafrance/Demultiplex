@@ -10,39 +10,52 @@
 
 2. Pseudo code:
 
-    # generate list of valid indexes
-    open indexes.txt as i:
-        add each to indexes
+    generate list of valid indexes
+    open indexes.txt. 
+        add each barcode to a list. 
 
     Generate all expected files (52 total) using the barcodes and R1/R2. Create a dictionary
-    with a string of the file name as the key and the file itself as the value. After they are
-    all created, open them. The file names should be make in 
-    such a way that they can be referred to using the actual index from the index file. 
-    in a dictionary. 
+    with a string of the file name as the key and the filehandle itself as the value. After they are
+    all created, open them. The file names should be made in such a way that they can be referred 
+    to using the actual barcode from the index file. 
 
         open read1.fq as r1, open read2.fq as r2, open index1.fq as i1, open index2.fq as i1:
             
-            Use counter to keep track of line, initialize at 1
+            Use counter to keep track of line, initialize at 0. 
+
+            Initialize an empty dictionary to store the current records. 
 
             for each line in the files
 
-                if the counter is 5 (then the record is assembled, do this:)
-                    reset counter to 1. 
-                    Filter index quality. If quality is too low or contains an N, add to unknown file. 
-                    if i1 or i2 is not an expected index add to unknown file. 
-                    else if i1 and i2 are expected indexes but are not reverse compliments of eachother
-                        add to hopped file. 
-                    else 
-                        update r1 header with indexes
-                        update r2 header with indexes
-                        write r1 and r2 to their corresponding files named with their indexes. 
-                        
-                Use a dictionary to store the current record for each file at
-                the same time:
+                Add records to the record dictionary. 
                 key will be "r1", "r2", "i1", or "i2". The value will be a list with the line
-                from the file with the index representing the line. So the header
-                will be pos 0, seq will be pos 1, + will be pos 2, and qual score 
+                from the file with the index position representing the line. So the header
+                will be pos 0, seq will be pos 1, "+" will be pos 2, and qual score 
                 will be pos 3. 
+
+                example: {"r1": ["@seq1", "ATGC", "+", "EEEE"], "r2"... etc.}
+
+                if the counter is 3 (then the entire current record is stored in the dictionary, do this:)
+                    reset counter to 0. 
+                    Filter barcode quality. Iterate over both i1 and i2, converting each to the numerical 
+                    score. If any base is below the quality threshold, add each read to corresponding 
+                    unknown file. 
+
+                    Compare i1 and i2 to barcode list. If either one is not present in the list, add 
+                    each read to corresponding unknown file.
+
+                    else if i1 and i2 are expected indexes but are not reverse compliments of eachother
+                        add each read to corresponding hopped files. 
+
+                    else (i1 and i2 are expected barcodes and are reverse compliments of eachother)
+                        update r1 header with barcode
+                        update r2 header with barcode
+                        write r1 and r2 to their corresponding files named with their barcodes. 
+
+                    reset record dictionary to empty. 
+                    
+
+                increment counter by 1. 
 
 
 3. High level functions:
@@ -50,10 +63,13 @@
     def generate_barcode_list(index_file: str) -> list:
         '''
         Takes a TSV file name as an argument. Opens the file that contains 
-        expected barcodes and generate a list of the expected barcodes. 
+        expected barcodes and generate a list of the expected barcodes. This 
+        list will be searched by the generate_output_files function to check 
+        if the current barcode is expected. 
         '''
 
         return barcode_list
+
 
     def generate_rev_comp(seq: str) -> str:
         '''
@@ -62,24 +78,13 @@
         '''
         return rev_comp
 
+
     def generate_output_files(barcodes: list) -> None:
         '''
         Takes a list of expected barcodes as an input and generates the
         expected files. One file per barcode and read. Includes unknown file
         and hopped index file per read. Total of 52 files. Generates a dictionary
-        with a string of the filename as a key and the file itself as a value. 
+        with a string of the filename as a key and the filehandle as a value. 
         Use this to refer to the file. 
         '''
         return 
-
-    For example, if the file is named AATTGGCC_R1.qf, use something like:
-            if barcode is valid: 
-                key = f"{barcode}-R1.fq"
-                output_file_dict[key].write(the current record)
-
-    Try using itertools to open all files. 
-
-
-Unit test valid barcodes:
-ACCCCCCC
-TCCCCCCC
