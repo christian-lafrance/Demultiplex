@@ -25,6 +25,9 @@
 
             Initialize an empty dictionary to store the current records. 
 
+            Initialize a second dictionary to keep track of the number of
+            records written to each file, matched, hopped, and unknown. 
+
             for each line in the files
 
                 Add records to the record dictionary. 
