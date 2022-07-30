@@ -34,12 +34,12 @@
 
     3. 
         
-        Index_1 file:
-        ```zcat 1294_S1_L008_R2_001.fastq.gz | sed -n "2~4p" | grep "N" | wc -l```
-        Result: 3976613 reads contain an N. 
-        Index_2 file:
-        ```zcat 1294_S1_L008_R3_001.fastq.gz | sed -n "2~4p" | grep "N" | wc -l```
-        Result: 3328051 reads contain an N. 
+        Index_1 file:  
+        ```zcat 1294_S1_L008_R2_001.fastq.gz | sed -n "2~4p" | grep "N" | wc -l```  
+        Result: 3976613 reads contain an N.   
+        Index_2 file:  
+        ```zcat 1294_S1_L008_R3_001.fastq.gz | sed -n "2~4p" | grep "N" | wc -l```  
+        Result: 3328051 reads contain an N.   
 
     
 ## Part 2
