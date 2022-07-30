@@ -1,0 +1,44 @@
+============================================================
+|                 Demultiplex lab notebook                 |
+============================================================
+
+
+
+Add data stored here: /projects/bgmp/shared/2017_sequencing
+
+ENVIRONMENT:
+
+    bgmp_py310
+
+1. DATA EXPLORATION:
+
+    1.1 Checked what the first reads looked like for each file:
+        zcat 1294_S1_L008_R1_001.fastq.gz | head -4
+        zcat 1294_S1_L008_R2_001.fastq.gz | head -4
+        zcat 1294_S1_L008_R3_001.fastq.gz | head -4
+        zcat 1294_S1_L008_R4_001.fastq.gz | head -4
+
+        R1 and R4 files are the read 1 and read 2 files of the biological samples. 
+        R2 and R3 are the indexes. 
+        The headers are almost identical at each position in each file. The reads
+        are from the same cluster. 
+
+        Reads are 101 bases long. 
+        Barcodes are 8 bases long. 
+        Quality scores are in Pred33. 
+        Barcode 2 of record 1 is the reverse compliment of barcode 1 of record 1
+        as expected. 
+
+    File info:
+        $ ls -lah
+            20G Jul 30  2018 1294_S1_L008_R1_001.fastq.gz
+            2.6G Jul 30  2018 1294_S1_L008_R2_001.fastq.gz
+            2.8G Jul 30  2018 1294_S1_L008_R3_001.fastq.gz
+            23G Jul 30  2018 1294_S1_L008_R4_001.fastq.gz
+            8.0K Jul  1 16:08 demultiplexed
+            631 Aug  9  2021 indexes.txt     
+
+
+       $ zcat 1294_S1_L008_R1_001.fastq.gz | wc -l
+            There are 1,452,986,940 lines 
+            and 363,242,235 records. 
