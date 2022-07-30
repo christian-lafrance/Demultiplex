@@ -12,10 +12,11 @@
 
 2. Per-base NT distribution
     1. Use markdown to insert your 4 histograms here.
-![](https://github.com/christian-lafrance/Demultiplex/blob/master/Assignment-the-first/Index_1.png)
-![](https://github.com/christian-lafrance/Demultiplex/blob/master/Assignment-the-first/Index_2.png)
-![](https://github.com/christian-lafrance/Demultiplex/blob/master/Assignment-the-first/Read_1.png)
-![](https://github.com/christian-lafrance/Demultiplex/blob/master/Assignment-the-first/Read_2.png)
+    ![](https://github.com/christian-lafrance/Demultiplex/blob/master/Assignment-the-first/Index_1.png)
+    ![](https://github.com/christian-lafrance/Demultiplex/blob/master/Assignment-the-first/Index_2.png)
+    ![](https://github.com/christian-lafrance/Demultiplex/blob/master/Assignment-the-first/Read_1.png)
+    ![](https://github.com/christian-lafrance/Demultiplex/blob/master/Assignment-the-first/Read_2.png)
+
 
     2.  30 seems like a good cut off for indexes. All of the average quality scores
         are above 30. A score of 30 would indicate a 0.1% chance of any base
