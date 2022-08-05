@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-
+# srun --account=bgmp --partition=bgmp --nodes=1 --ntasks-per-node=1 --time=2:00:00 --cpus-per-task=1 --pty bash
 import argparse
 import bioinfo
 import gzip
@@ -17,15 +17,8 @@ def get_args():
     parser.add_argument("-i1", help="index 1 file", required=True, type=str)
     parser.add_argument("-i2", help="index 2 file", required=True, type=str)
     parser.add_argument("-index", help="TSV file with expected indexes", required=True, type=str)
-    parser.add_argument(
-        "-q", help="quality score cut off for index reads, default is 30", 
-        required=False, type=int, default=30
-        )
-    parser.add_argument(
-        "-n", help='''Number of bases allow to have N or quality score 
-                below the threshold. Default is 3.''', 
-                required=False, type=int, default=3
-                )
+    parser.add_argument("-q", help="quality score cut off for index reads, default is 30", required=False, type=int, default=30)
+    parser.add_argument("-n", help="Number of bases allow to have quality score below the threshold. Default is 3.", required=False, type=int, default=3)
     parser.add_argument("-o", help="directory name for output files", required=True, type=str)
     return parser.parse_args()
 args = get_args()
@@ -38,7 +31,6 @@ def generate_barcode_list(index_file: str) -> set:
     list will be searched by the generate_output_files function to check 
     if the current barcode is expected. 
     '''
-
     barcodes = set() # stores each valid barcode as a string. 
 
     with open(index_file, "r") as f:
@@ -81,10 +73,8 @@ def generate_output_files(barcodes: set, is_pairedend: bool) -> dict:
     return output_files_dict
 
 
-def write_record(
-    prefix: str, index1_seq: str, index2_seq: str, current_records: dict, 
-    output_files_dict: dict
-    ) -> None:
+def write_record(prefix: str, index1_seq: str, index2_seq: str, 
+                current_records: dict, output_files_dict: dict) -> None:
     '''
     General function used to write files based on the current record and
     the index sequences. Returns None. 
@@ -116,16 +106,22 @@ def parse_and_write_files(barcodes, output_files_dict) -> tuple[dict:dict]:
     '''
     with gzip.open(args.r1, "rt", encoding="utf-8") as r1_file, gzip.open(args.r2, "rt", encoding="utf-8") as r2_file, gzip.open(args.i1, "rt", encoding="utf-8") as i1_file, gzip.open(args.i2, "rt", encoding="utf-8") as i2_file:
         
-        record_count = 0
-        line_counter = 0
-        hopped_dict = {}
-        current_records = {
-            "r1": ["", "", "", ""], "r2": ["", "", "", ""], 
-            "i1": ["", "", "", ""], "i2": ["", "", "", ""]
-            }
-        stats_dict = {}         
+        line_counter = 0 # counts 0-4 to assemble each record one at a time in memory. 
+        hopped_dict = {} # stores hopped indexes and counts: index1-index2: count.
+        stats_dict = {}  # stores counts for hopped, unknown, and mapped records. 
+        matched_count = {} # stores counts of dual-matched records: index1 : count. 
+        current_records = {"r1": ["", "", "", ""], "r2": ["", "", "", ""], 
+                            "i1": ["", "", "", ""], "i2": ["", "", "", ""]}       
         
         for r1, r2, i1, i2 in zip(r1_file, r2_file, i1_file, i2_file):
+            
+            # Assemble the current record using the line counter. 
+            current_records["r1"][line_counter] = r1.strip("\n") 
+            current_records["r2"][line_counter] = r2.strip("\n")
+            current_records["i1"][line_counter] = i1.strip("\n")
+            current_records["i2"][line_counter] = i2.strip("\n")
+
+            line_counter += 1
         
             if line_counter == 4:
                 '''
@@ -205,10 +201,11 @@ def parse_and_write_files(barcodes, output_files_dict) -> tuple[dict:dict]:
                                 All scores are above the threshold. Write reads to dual-mapped files. 
                                 '''
                                 write_record(index1_seq, index1_seq, index2_seq, current_records, output_files_dict)
-                                if "dual_matched" in stats_dict:
-                                    stats_dict["dual_matched"] += 1
+
+                                if index1_seq in matched_count:
+                                    matched_count[index1_seq] += 1
                                 else:
-                                    stats_dict["dual_matched"] = 1
+                                    matched_count[index1_seq] = 1
 
                 else:
                     '''
@@ -223,24 +220,14 @@ def parse_and_write_files(barcodes, output_files_dict) -> tuple[dict:dict]:
                     else:
                         stats_dict["unknown_indexes"] = 1
 
-            '''
-            Assemble the current record using the line counter. 
-            '''
-            current_records["r1"][line_counter] = r1.strip("\n") 
-            current_records["r2"][line_counter] = r2.strip("\n")
-            current_records["i1"][line_counter] = i1.strip("\n")
-            current_records["i2"][line_counter] = i2.strip("\n")
-
-            line_counter += 1
-
     # close files when done
     for file in output_files_dict:
         output_files_dict[file].close()
 
-    return stats_dict, hopped_dict
+    return stats_dict, hopped_dict, matched_count
 
 
-def generate_user_report(summary_stats: dict, hopped_dict: dict, barcodes: list) -> None:
+def generate_user_report(summary_stats: dict, hopped_dict: dict, matched_count: dict, barcode_set: list) -> None:
     '''
     Generates Demultiplex_summary.tsv which includes number of hopped indexes,
     number of unknown indexes, number of dual-matched indexes, and their
@@ -249,6 +236,7 @@ def generate_user_report(summary_stats: dict, hopped_dict: dict, barcodes: list)
     '''
 
     # plot heatmap
+    barcodes = sorted(list(barcode_set))
     l = len(barcodes)
     values = [[0 for i in range(l)] for j in range(l)] 
 
@@ -269,13 +257,11 @@ def generate_user_report(summary_stats: dict, hopped_dict: dict, barcodes: list)
     ax.set_xticks(np.arange(l), labels=barcodes)
     ax.set_yticks(np.arange(l), labels=barcodes)
 
-    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-            rotation_mode="anchor")
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
 
     for i in range(l):
         for j in range(l):
-            text = ax.text(j, i, values[i][j],
-                        ha="center", va="center", color="w")
+            text = ax.text(j, i, values[i][j], ha="center", va="center", color="w")
 
     ax.set_title("Heatmap of Index Hopping")
     plt.savefig("Index_hopping_heatmap.png")
@@ -283,32 +269,33 @@ def generate_user_report(summary_stats: dict, hopped_dict: dict, barcodes: list)
 
     # write summary file
     total = 0
+    matched = 0
     for key, value in stats_dict.items():
         total += value
+    for value in matched_count.values():
+        total += value
+        matched += value
 
     try:
         hopped = stats_dict["hopped_indexes"]
     except KeyError:
         hopped = 0
-        
+
     hopped_perc = round(hopped/total, 3)
     unknown = stats_dict["unknown_indexes"]
     unknown_perc = round(unknown/total, 3)
 
-    try:
-        matched = stats_dict["dual_matched"]
-    except KeyError:
-        matched = 0
-
-    matched_perc = round(matched/total, 3)
-
-    with open("Demultiplex_summary.tsv", "w") as out:
-
-        out.write("Hopped\tHopped_%\tUnknown\tUnknown_%\tDual-matched\tDual-matched_%\tTotal\n")
-        out.write(f"{hopped}\t{hopped_perc}\t{unknown}\t{unknown_perc}\t{matched}\t{matched_perc}\t{total}")
+    with open("Demultiplex_summary.txt", "w") as out:
+        for name, count in stats_dict.items():
+            out.write(f"{name}: {count}\n")
+        out.write(f"matched_count: {matched}\n")
+        out.write(f"Total Records: {total}\n\n")
+        out.write("========== Barcodes ==========\n")
+        out.write("Index\t% of total\t% of matched\n")
+        for name, count in matched_count.items():
+            out.write(f"{name}: {round(count/total, 3)}\t{round(count/matched, 3)}\n")
 
     return
-
 
 
 # FUNCTION CALLS
@@ -316,6 +303,6 @@ is_pairedend = args.pe
 
 barcodes = generate_barcode_list(args.index)
 output_files_dict = generate_output_files(barcodes, is_pairedend)
-stats_dict, hopped_dict = parse_and_write_files(barcodes, output_files_dict)
-generate_user_report(stats_dict, hopped_dict, barcodes)
+stats_dict, hopped_dict, matched_count = parse_and_write_files(barcodes, output_files_dict)
+generate_user_report(stats_dict, hopped_dict, matched_count, barcodes)
 

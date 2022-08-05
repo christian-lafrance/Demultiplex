@@ -15,4 +15,9 @@ dataDir="/projects/bgmp/shared/2017_sequencing/"
 /usr/bin/time -v ./demultiplex.py -pe True -r1 $dataDir/1294_S1_L008_R1_001.fastq.gz \
 -r2 $dataDir/1294_S1_L008_R4_001.fastq.gz -i1 $dataDir/1294_S1_L008_R2_001.fastq.gz \
 -i2 $dataDir/1294_S1_L008_R3_001.fastq.gz -index $dataDir/indexes.txt \
--q 30 -n 3 -o output_files/
+-q 0 -n 8 -o output_files/
+
+
+# zip files
+cd $myDir/output_files
+pigz *.fq
