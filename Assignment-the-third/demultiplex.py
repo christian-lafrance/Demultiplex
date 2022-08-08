@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-# srun --account=bgmp --partition=bgmp --nodes=1 --ntasks-per-node=1 --time=2:00:00 --cpus-per-task=1 --pty bash
 import argparse
 import bioinfo
 import gzip
@@ -234,7 +233,6 @@ def generate_user_report(summary_stats: dict, hopped_dict: dict, matched_count: 
     percentages. Also generates a heatmap of hopped indexes and the number
     of occurences. 
     '''
-
     # plot heatmap
     barcodes = sorted(list(barcode_set))
     l = len(barcodes)
@@ -286,14 +284,18 @@ def generate_user_report(summary_stats: dict, hopped_dict: dict, matched_count: 
     unknown_perc = round(unknown/total, 3)
 
     with open("Demultiplex_summary.txt", "w") as out:
+        out.write("===User parameters for barcode identification ===\n")
+        out.write(f"quality_cutoff: {args.q}\n")
+        out.write(f"# of bases allowed below cutoff: {args.n}\n\n")
+        out.write("========== Record counts ==========\n")
         for name, count in stats_dict.items():
             out.write(f"{name}: {count}\n")
         out.write(f"matched_count: {matched}\n")
-        out.write(f"Total Records: {total}\n\n")
+        out.write(f"total_records: {total}\n\n")
         out.write("========== Barcodes ==========\n")
-        out.write("Index\t% of total\t% of matched\n")
+        out.write("Index:\t\t%_of_total\t%_of_matched\n")
         for name, count in matched_count.items():
-            out.write(f"{name}: {round(count/total, 3)}\t{round(count/matched, 3)}\n")
+            out.write(f"{name}:\t\t{round(count/total, 3)*100}\t\t{round(count/matched, 3)*100}\n")
 
     return
 
