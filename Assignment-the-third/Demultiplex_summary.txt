@@ -1,0 +1,36 @@
+=== User parameters for barcode identification ===
+quality_cutoff: 0
+# of bases allowed below cutoff: 3
+
+========== Record counts ==========
+unknown_indexes: 30783962
+hopped_indexes: 707740
+matched_count: 331755033
+total_records: 363246735
+
+========== Barcodes ==========
+Index:      %_of_total  %_of_matched
+TACCGGAT:       21.0        23.0
+CTCTGGAT:       9.6	        10.5
+AGAGTCCA:       3.1	        3.4
+GTAGCGTA:       2.2	        2.4
+ATCATGCG:       2.8	        3.0
+AACAGCGA:       2.4	        2.7
+TCGACAAG:       1.1	        1.2
+TGTTCCGT:       4.3	        4.7
+TCGAGAGT:       3.2	        3.5
+CGGTAATC:       1.4	        1.5
+TAGCCATG:       2.9	        3.2
+TCTTCGAC:       11.6	    12.7
+CTAGCTCA:       4.8	        5.2
+TATGGCAC:       3.1	        3.4
+ACGATCAG:       2.2	        2.4
+GATCTTGC:       1.0	        1.1
+AGGATAGC:       2.4         2.6
+CACTTCAC:       1.2	        1.3
+GCTACTCT:       2.0	        2.2
+ATCGTGGT:       1.9	        2.1
+CGATCGAT:       1.5	        1.7
+GTCCTAAG:       2.4	        2.7
+GATCAAGG:       1.8	        2.0
+TCGGATTC:       1.3	        1.4
