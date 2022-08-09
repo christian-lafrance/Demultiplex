@@ -1,18 +1,17 @@
 #!/usr/bin/env python
 
-# Author: Christian La Franmce clafranc@uoregon.edy
+# Author: Christian La France clafranc@uoregon.edu
 # Check out some Python module resources:
 #   - https://docs.python.org/3/tutorial/modules.html
 #   - 
 #https://python101.pythonlibrary.org/chapter36_creating_modules_and_packages.html
 #   - and many more: https://www.google.com/search?q=how+to+write+a+python+module
 '''This module is a collection of useful bioinformatics functions
-written during the Bioinformatics and Genomics Program coursework.
-You should update this docstring to reflect what you would like it to say'''
+written during the Bioinformatics and Genomics Program coursework.'''
 __version__ = "0.6"         # Read way more about versioning here:
                             # https://en.wikipedia.org/wiki/Software_versioning
-DNA_bases = "ATGCN"
-RNA_bases = "AUGCN"
+DNA_bases = "ATGCNatgcn"
+RNA_bases = "AUGCNaugcn"
 
 def convert_phred(letter:str) -> int:
     '''
@@ -46,7 +45,7 @@ def validate_base_seq(seq:str, RNA=False) -> bool:
 
     seq = seq.upper()
 
-    return len(seq) == seq.count("A") + seq.count("U" if RNA else "T") + seq.count("G") + seq.count("C") 
+    return len(seq) == seq.count("A") + seq.count("U" if RNA else "T") + seq.count("G") + seq.count("C") + seq.count("N") 
 
 
 
@@ -69,7 +68,7 @@ def oneline_fasta(fasta_file: str):
     the sequences. The oneline fasta file will be named
     oneline_{fasta_file}.
     '''
-    with open(f"oneline_{fasta_file}", "w") as out:
+    with open(f"oneline_output.fasta", "w") as out:
         with open(fasta_file, "r") as fa:
             first_line = True
             for line in fa:
@@ -82,24 +81,6 @@ def oneline_fasta(fasta_file: str):
                     out.write(line)
                     first_line = False
 
-def rev_comp(seq: str) -> str:
-    '''
-    Accepts as an argument a string, checks if it contains valid nucleic
-    acid characters, and returns the reverse complement of the sequence. 
-    Works for both DNA and RNA. 
-    '''
-    upper_seq = seq.upper()
-    complement = {"A":"T", "T":"A", "G":"C", "C":"G", "U":"A", "N":"N"}
-
-    rcomp = "" # the reverse complement of seq. 
-
-    for base in upper_seq:
-        if base in DNA_bases or base in RNA_bases:
-            rcomp += complement[base]
-        else:
-            raise Exception(f"Sequence contains invalid base: \"{base}\"")
-
-    return rcomp[::-1]
 
 if __name__ == "__main__":
     assert validate_base_seq("AATAGAT", False) == True
@@ -113,7 +94,3 @@ if __name__ == "__main__":
     assert convert_phred("E") == 36
 
     assert qual_score(["E", "A"]) == 34.0
-
-    assert rev_comp("ATGCN") == "NGCAT"
-
-    
