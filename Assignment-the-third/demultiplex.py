@@ -1,5 +1,25 @@
 #!/usr/bin/env python
 
+'''
+This script reads in FASTQ records and expected barcodes, demultiplexes the dual-matched reads, 
+and generates a user report. It filters barcodes for quality based on user parameters. It can 
+demultiplex single reads or paired-end reads. 
+
+~~~ Arguments ~~~
+-pe -> bool indicating if records are from paired-end reads (required).
+-r1 -> read 1 FASTQ file (required). 
+-r2 -> read 2 FASTQ file (optional). Required if -pe == True. 
+-i1 -> index 1 FASTQ file (required).
+-i2 -> index 2 FASTQ file (required).
+-index -> TSV file with expected barcode sequences. Barcodes must be in the right most column. 
+            A header is expected (required). 
+-q -> quality score cutoff for identification of expected barcodes. Decault is 30. 
+-n -> number of nonconsecutive bases in the barcode sequence that are allowed to be below the quality 
+        cutoff, after which the record will be written to unknown files. Default is 3. 
+-o -> output directory where the demultiplexed FASTQ files will be written. 
+
+'''
+
 import argparse
 import bioinfo
 import gzip
@@ -10,7 +30,7 @@ import matplotlib.pyplot as plt
 
 def get_args():
     parser = argparse.ArgumentParser(description="demultiplex.py")
-    parser.add_argument("-pe", help="Bool indicating paired-end reads", required=False, type=bool)
+    parser.add_argument("-pe", help="Bool indicating paired-end reads", required=False, type=bool, default=True)
     parser.add_argument("-r1", help="Read 1 file", required=True, type=str)
     parser.add_argument("-r2", help="Read 2 file", required=False, type=str)
     parser.add_argument("-i1", help="index 1 file", required=True, type=str)
@@ -73,25 +93,27 @@ def generate_output_files(barcodes: set, is_pairedend: bool) -> dict:
 
 
 def write_record(prefix: str, index1_seq: str, index2_seq: str, 
-                current_records: dict, output_files_dict: dict) -> None:
+                current_records: dict, output_files_dict: dict, is_pairedend: bool) -> None:
     '''
     General function used to write files based on the current record and
     the index sequences. Returns None. 
     '''
     # update headers with indexes
     current_records["r1"][0] += f" {index1_seq}-{index2_seq}"
-    current_records["r2"][0] += f" {index1_seq}-{index2_seq}"
+    if is_pairedend:
+        current_records["r2"][0] += f" {index1_seq}-{index2_seq}"
 
     # write current records to unknown fq files. 
     output_files_dict[f"{prefix}_R1.fq"].write("\n".join(current_records["r1"]))
     output_files_dict[f"{prefix}_R1.fq"].write("\n")
-    output_files_dict[f"{prefix}_R2.fq"].write("\n".join(current_records["r2"]))
-    output_files_dict[f"{prefix}_R2.fq"].write("\n")
+    if is_pairedend:
+        output_files_dict[f"{prefix}_R2.fq"].write("\n".join(current_records["r2"]))
+        output_files_dict[f"{prefix}_R2.fq"].write("\n")
 
     return
 
 
-def parse_and_write_files(barcodes, output_files_dict) -> tuple[dict:dict]:
+def parse_and_write_files(barcodes: list, output_files_dict: dict, is_pairedend: bool) -> tuple[dict:dict]:
     '''
     Need to update to make functional with is_pairedend bool.
 
@@ -138,7 +160,7 @@ def parse_and_write_files(barcodes, output_files_dict) -> tuple[dict:dict]:
 
                 if "N" in index1_seq or "N" in index2_seq:
                     '''Write to unknown file'''
-                    write_record("unknown", index1_seq, index2_seq, current_records, output_files_dict)
+                    write_record("unknown", index1_seq, index2_seq, current_records, output_files_dict, is_pairedend)
 
                     # collect unknown stats. 
                     if "unknown_indexes" in stats_dict:
@@ -149,7 +171,7 @@ def parse_and_write_files(barcodes, output_files_dict) -> tuple[dict:dict]:
                 elif index1_seq in barcodes and index2_seq in barcodes:
                     if index1_seq != index2_seq:
                         '''They are hopped. Write to hopped file. '''
-                        write_record("hopped", index1_seq, index2_seq, current_records, output_files_dict)
+                        write_record("hopped", index1_seq, index2_seq, current_records, output_files_dict, is_pairedend)
 
                         # collect hopped stats. 
                         if "hopped_indexes" in stats_dict:
@@ -184,7 +206,7 @@ def parse_and_write_files(barcodes, output_files_dict) -> tuple[dict:dict]:
                             if i1_score < args.q or i2_score < args.q:
                                 low_qual_base_count += 1
                             if low_qual_base_count > args.n:
-                                write_record("unknown", index1_seq, index2_seq, current_records, output_files_dict)                                
+                                write_record("unknown", index1_seq, index2_seq, current_records, output_files_dict, is_pairedend)                                
                                 if "unknown_indexes" in stats_dict:
                                     stats_dict["unknown_indexes"] += 1
                                 else:
@@ -193,7 +215,7 @@ def parse_and_write_files(barcodes, output_files_dict) -> tuple[dict:dict]:
 
                             elif i == len(index1_seq)-1:
                                 '''All scores are above the threshold. Write reads to dual-mapped files.'''
-                                write_record(index1_seq, index1_seq, index2_seq, current_records, output_files_dict)
+                                write_record(index1_seq, index1_seq, index2_seq, current_records, output_files_dict, is_pairedend)
 
                                 if index1_seq in matched_count:
                                     matched_count[index1_seq] += 1
@@ -205,7 +227,7 @@ def parse_and_write_files(barcodes, output_files_dict) -> tuple[dict:dict]:
                     At least one index is not expected. Update headers and write
                     to unknown files. Use write_record function. 
                     '''
-                    write_record("unknown", index1_seq, index2_seq, current_records, output_files_dict)
+                    write_record("unknown", index1_seq, index2_seq, current_records, output_files_dict, is_pairedend)
 
                     # collect unknown stats. 
                     if "unknown_indexes" in stats_dict:
@@ -220,7 +242,7 @@ def parse_and_write_files(barcodes, output_files_dict) -> tuple[dict:dict]:
     return stats_dict, hopped_dict, matched_count
 
 
-def generate_user_report(summary_stats: dict, hopped_dict: dict, matched_count: dict, barcode_set: list) -> None:
+def generate_user_report(summary_stats: dict, hopped_dict: dict, matched_count: dict, barcode_set: list, is_pairedend: bool) -> None:
     '''
     Generates Demultiplex_summary.tsv which includes number of hopped indexes,
     number of unknown indexes, number of dual-matched indexes, and their
@@ -279,6 +301,7 @@ def generate_user_report(summary_stats: dict, hopped_dict: dict, matched_count: 
 
     with open("Demultiplex_summary.txt", "w") as out:
         out.write("=== User parameters for barcode identification ===\n")
+        out.write(f"Paired-end: {is_pairedend}\n")
         out.write(f"quality_cutoff: {args.q}\n")
         out.write(f"# of bases allowed below cutoff: {args.n}\n\n")
         out.write("========== Record counts ==========\n")
@@ -287,9 +310,9 @@ def generate_user_report(summary_stats: dict, hopped_dict: dict, matched_count: 
         out.write(f"dual_matched_count: {matched}\n")
         out.write(f"total_records: {total}\n\n")
         out.write("========== Dual-matched ==========\n")
-        out.write("Index:\t\t%_of_total\t%_of_matched\n")
+        out.write("Index:\t\tcount\t%_of_total\t%_of_matched\n")
         for name, count in matched_count.items():
-            out.write(f"{name}:\t\t{round(count/total*100, 3)}\t\t{round(count/matched*100, 3)}\n")
+            out.write(f"{name}:\t\t{count}\t\t{round(count/total*100, 3)}\t\t{round(count/matched*100, 3)}\n")
 
         out.write("\n\n========== Hopped indexes ==========\n")
         out.write("Index pair: count\n")
@@ -316,6 +339,6 @@ is_pairedend = args.pe
 
 barcodes = generate_barcode_list(args.index)
 output_files_dict = generate_output_files(barcodes, is_pairedend)
-stats_dict, hopped_dict, matched_count = parse_and_write_files(barcodes, output_files_dict)
-generate_user_report(stats_dict, hopped_dict, matched_count, barcodes)
+stats_dict, hopped_dict, matched_count = parse_and_write_files(barcodes, output_files_dict, is_pairedend)
+generate_user_report(stats_dict, hopped_dict, matched_count, barcodes, is_pairedend)
 
