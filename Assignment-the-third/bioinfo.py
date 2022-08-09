@@ -81,6 +81,19 @@ def oneline_fasta(fasta_file: str):
                     out.write(line)
                     first_line = False
 
+def rev_comp(seq:str) -> str:
+    '''
+    Takes as an argument a string of a DNA sequence and
+    returns its reverse complement. 
+    '''
+    pairs = {"A":"T", "T":"A", "G":"C", "C":"G", "N":"N"}
+
+    comp = ""
+    for base in seq:
+        comp += pairs[base]
+
+    return comp[::-1]
+
 
 if __name__ == "__main__":
     assert validate_base_seq("AATAGAT", False) == True
@@ -94,3 +107,5 @@ if __name__ == "__main__":
     assert convert_phred("E") == 36
 
     assert qual_score(["E", "A"]) == 34.0
+
+    assert rev_comp("ATGC") == "GCAT"
