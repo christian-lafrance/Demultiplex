@@ -17,7 +17,7 @@ def get_args():
     parser.add_argument("-i2", help="index 2 file", required=True, type=str)
     parser.add_argument("-index", help="TSV file with expected indexes", required=True, type=str)
     parser.add_argument("-q", help="quality score cut off for index reads, default is 30", required=False, type=int, default=30)
-    parser.add_argument("-n", help="Number of bases allow to have quality score below the threshold. Default is 3.", required=False, type=int, default=3)
+    parser.add_argument("-n", help="Number of bases allowed to have quality score below the threshold. Default is 3.", required=False, type=int, default=3)
     parser.add_argument("-o", help="directory name for output files", required=True, type=str)
     return parser.parse_args()
 args = get_args()
@@ -110,7 +110,7 @@ def parse_and_write_files(barcodes, output_files_dict) -> tuple[dict:dict]:
         stats_dict = {}  # stores counts for hopped, unknown, and mapped records. 
         matched_count = {} # stores counts of dual-matched records: index1 : count. 
         current_records = {"r1": ["", "", "", ""], "r2": ["", "", "", ""], 
-                            "i1": ["", "", "", ""], "i2": ["", "", "", ""]}       
+                            "i1": ["", "", "", ""], "i2": ["", "", "", ""]} # stores the current record. 
         
         for r1, r2, i1, i2 in zip(r1_file, r2_file, i1_file, i2_file):
             
@@ -137,9 +137,7 @@ def parse_and_write_files(barcodes, output_files_dict) -> tuple[dict:dict]:
                 index2_seq = bioinfo.rev_comp(current_records["i2"][1])
 
                 if "N" in index1_seq or "N" in index2_seq:
-                    '''
-                    Write to unknown file
-                    '''
+                    '''Write to unknown file'''
                     write_record("unknown", index1_seq, index2_seq, current_records, output_files_dict)
 
                     # collect unknown stats. 
@@ -150,9 +148,7 @@ def parse_and_write_files(barcodes, output_files_dict) -> tuple[dict:dict]:
 
                 elif index1_seq in barcodes and index2_seq in barcodes:
                     if index1_seq != index2_seq:
-                        '''
-                        They are hopped. Write to hopped file. 
-                        '''
+                        '''They are hopped. Write to hopped file. '''
                         write_record("hopped", index1_seq, index2_seq, current_records, output_files_dict)
 
                         # collect hopped stats. 
@@ -196,9 +192,7 @@ def parse_and_write_files(barcodes, output_files_dict) -> tuple[dict:dict]:
                                 break
 
                             elif i == len(index1_seq)-1:
-                                '''
-                                All scores are above the threshold. Write reads to dual-mapped files. 
-                                '''
+                                '''All scores are above the threshold. Write reads to dual-mapped files.'''
                                 write_record(index1_seq, index1_seq, index2_seq, current_records, output_files_dict)
 
                                 if index1_seq in matched_count:
@@ -265,7 +259,7 @@ def generate_user_report(summary_stats: dict, hopped_dict: dict, matched_count: 
     plt.savefig("Index_hopping_heatmap.png")
 
 
-    # write summary file
+    '''write summary file'''
     total = 0
     matched = 0
     for key, value in stats_dict.items():
@@ -284,18 +278,35 @@ def generate_user_report(summary_stats: dict, hopped_dict: dict, matched_count: 
     unknown_perc = round(unknown/total, 3)
 
     with open("Demultiplex_summary.txt", "w") as out:
-        out.write("===User parameters for barcode identification ===\n")
+        out.write("=== User parameters for barcode identification ===\n")
         out.write(f"quality_cutoff: {args.q}\n")
         out.write(f"# of bases allowed below cutoff: {args.n}\n\n")
         out.write("========== Record counts ==========\n")
         for name, count in stats_dict.items():
             out.write(f"{name}: {count}\n")
-        out.write(f"matched_count: {matched}\n")
+        out.write(f"dual_matched_count: {matched}\n")
         out.write(f"total_records: {total}\n\n")
-        out.write("========== Barcodes ==========\n")
+        out.write("========== Dual-matched ==========\n")
         out.write("Index:\t\t%_of_total\t%_of_matched\n")
         for name, count in matched_count.items():
-            out.write(f"{name}:\t\t{round(count/total, 3)*100}\t\t{round(count/matched, 3)*100}\n")
+            out.write(f"{name}:\t\t{round(count/total*100, 3)}\t\t{round(count/matched*100, 3)}\n")
+
+        out.write("\n\n========== Hopped indexes ==========\n")
+        out.write("Index pair: count\n")
+
+        '''
+        Include hopped indexes and counts in the report. Need to sort by the
+        values of hopped_dict. To do this, iterate over the dictionary, creating
+        a list of tuples with keys and values swapped. Sorted will then sort
+        by the counts. 
+        '''
+        hopped_list = []
+        for k, v in hopped_dict.items():
+            hopped_list.append((v, k))
+        for item in sorted(hopped_list, reverse=True):
+            indexes = item[1]
+            count = item[0]
+            out.write(f"{indexes}: {count}\n")
 
     return
 
