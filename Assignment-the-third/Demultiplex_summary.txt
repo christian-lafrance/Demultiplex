@@ -38,7 +38,7 @@ TCGGATTC:	4611350		1.269		1.39
 
 
 ========== Hopped indexes ==========
-Index pair: count
+Index pair: count 
 TATGGCAC-TGTTCCGT: 88570
 TGTTCCGT-TATGGCAC: 85535
 TACCGGAT-CTCTGGAT: 20268
