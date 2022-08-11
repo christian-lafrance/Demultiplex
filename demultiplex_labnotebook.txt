@@ -8,6 +8,13 @@ ENVIRONMENT:
 
     bgmp_py310
 
+Software/modules:
+
+    python v3.10.5
+    numpy v1.23.1
+    matplotlib v3.5.2 
+    pigz 2.3.4
+
 1. DATA EXPLORATION:
 
     1.1 Checked what the first reads looked like for each file:
