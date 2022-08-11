@@ -13,7 +13,8 @@ Software/modules:
     python v3.10.5
     numpy v1.23.1
     matplotlib v3.5.2 
-    pigz 2.3.4
+    pigz v2.3.44
+    bioinfo v0.6
 
 1. DATA EXPLORATION:
 
