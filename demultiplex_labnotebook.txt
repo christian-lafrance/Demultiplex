@@ -2,8 +2,6 @@
 |                 Demultiplex lab notebook                 |
 ============================================================
 
-
-
 Add data stored here: /projects/bgmp/shared/2017_sequencing
 
 ENVIRONMENT:
@@ -38,7 +36,32 @@ ENVIRONMENT:
             8.0K Jul  1 16:08 demultiplexed
             631 Aug  9  2021 indexes.txt     
 
-
        $ zcat 1294_S1_L008_R1_001.fastq.gz | wc -l
             There are 1,452,986,940 lines 
-            and 363,242,235 records. 
+            and 363,246,735 records. 
+
+2. DATA PROCESSING
+
+    2.1 Reads were demultiplexed based on the dual-matched barcodes provided
+        in indexes.txt. Used demultiplex.py and demultiplex.sh. 
+
+    2.2 Results summary:
+            Paired-end: True
+            quality_cutoff: 30
+            # of bases allowed below cutoff: 3
+
+            unknown_indexes: 30783962
+            hopped_indexes: 707740
+            dual_matched_count: 331755033
+            total_records: 363246735
+
+    2.3 Detailed results are in Demultiplex_summary.txt. 
+
+    2.4 Run info:
+
+        Python script:
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 1:59:44
+        Percent of CPU this job got: 89%
+        Maximum resident set size (kbytes): 287368
+
+        Used 20 cores for pigz zipping of fastq output files. 
